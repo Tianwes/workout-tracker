@@ -8,17 +8,18 @@ const workoutSchema = new Schema(
       type: Date,
       default: () => new Date(),
     },
+    // required : (ones that are needed by either/both choice(s)) ??
     exercises: [
       {
         type: {
           type: String,
           trim: true,
-          required: "Enter an exercise type",
+          required: "Resistance or Cardio",
         },
         name: {
           type: String,
           trim: true,
-          required: "Enter an exercise name",
+          required: "Enter exercise name",
         },
         weight: {
           type: Number,
@@ -34,7 +35,7 @@ const workoutSchema = new Schema(
         },
         duration: {
             type: Number,
-            required: "Enter the duration of exercise (minutes)",
+            required: "Duration of exercise",
           },
       },
     ],
