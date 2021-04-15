@@ -1,46 +1,70 @@
 const router = require("express").Router();
-const db = require("../models");
+const Workout = require("../models/workout.js");
 
 // CRUD : Create, Read, Update, Delete
 //        Post    Get    Put    Delete
 
 // (GET)  last workout
-router.get("/workouts", (req, res) => {
-  db.Workout.find({});
-  console.log("routes/api.js line 10")
-    .then((data) => {
-      console.log("routes/api.js line 12");
-      console.log(data)
-      res.json(data);
+router.get("/api/workouts", (req, res) => {
+  Workout.aggregate([
+    {
+      $addFields: {
+        totalDuration: {
+          $sum: "$exercises.duration",
+        },
+      },
+    },
+  ])
+    .then((dbWorkout) => {
+      res.json(dbWorkout);
     })
     .catch((err) => {
-      console.log("Error - routes/api.js line 17");
-      res.json(err);
+      res.status(400).json(err);
     });
 });
 
 // (PUT)   add exercise
 router.put("/api/workouts/:id", (req, res) => {
-//  ENDED HERE MONDAY 4/12
+  Workout.findByIdAndUpdate(
+    req.params.id,
+    { $push: { exercises: req.body } },
+    { new: true, runValidators: true }
+  )
+    .then((dbWorkout) => {
+      res.json(dbWorkout);
+    })
+    .catch((err) => {
+      res.status(400).json(err);
+    });
 });
 
 // (POST)  create workout
-router.post("/api/workouts", (req, res) => {
-  db.Workout.create(body)
-    .then((data) => {
-      res.json(data);
+router.post("/api/workouts", ({ body }, res) => {
+  Workout.create({})
+    .then((dbWorkout) => {
+      res.json(dbWorkout);
     })
     .catch((err) => {
-      res.json(err);
+      res.status(400).json(err);
     });
-})
+});
 
+//   // ***** README LINKS ******
 // (GET)  get workout ranges
 router.get("/api/workouts/range", (req, res) => {
-  db.Workout.find({})
-    .sort({ date: -1 })
-    .then((data) => {
-      res.json(data);
+  Workout.aggregate([
+    {
+      $addFields: {
+        totalDuration: {
+          $sum: "$exercises.duration",
+        },
+      },
+    },
+  ])
+    .sort({ _id: -1 })
+    .limit(7)
+    .then((dbWorkout) => {
+      res.json(dbWorkout);
     })
     .catch((err) => {
       res.status(400).json(err);
